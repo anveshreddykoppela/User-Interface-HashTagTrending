@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HashTag Trending</title>
+<link rel="stylesheet" href="css/reuters.css">
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+<link rel="stylesheet"
+	href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css">
+<script src="js/reuters.js"></script>
+<script src="../../core/Core.js"></script>
+<script src="../../core/AbstractManager.js"></script>
+<script src="../../managers/Manager.jquery.js"></script>
+<script src="../../core/Parameter.js"></script>
+<script src="../../core/ParameterStore.js"></script>
+<script src="../../core/AbstractWidget.js"></script>
+<script src="widgets/ResultWidget.js"></script>
+<script src="../../core/AbstractFacetWidget.js"></script>
+<!-- Anvesh changes -->
+<script src="widgets/VolumeHashTags.js"></script>
+<script src="file://G:\\Eclipse_main\\HashTagTrending\\UserInterface\\jsonhashtag.jsonp"></script>
+<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+<!-- Anvesh Changes -->
+<!--  <script src="../../widgets/jquery/PagerWidget.js"></script> -->
+
+<!--   <script src="widgets/TagcloudWidget.js"></script>
+  <script src="widgets/CurrentSearchWidget.9.js"></script>
+  <script src="../../core/AbstractTextWidget.js"></script>
+  <script src="widgets/AutocompleteWidget.js"></script>
+  <script src="widgets/CountryCodeWidget.js"></script>
+  <script src="widgets/CalendarWidget.js"></script> -->
+</head>
+<body style="background-color: #FFFFDE">
+	<div id="wrapper"
+		style="width: 100%; height: 100%; background-color: #FFFFDE;">
+		<div id="header"
+			style="width: 100%; height: 80px; text-align: center; font-size: xx-large; font-family: cursive; font-style: italic; padding-top: 15px;">
+			Hash Tag Trending Demonstration</div>
+		<div id="timeline"
+			style="width: 70%; height: 400px; float: left; border: 2px solid maroon; background-color: aliceblue; margin-top: 5px; margin-left: 1%; margin-bottom: 10px; margin-right: 1%;">Annotated
+			Timeline</div>
+		<div id="#breakinghashtags"
+			style="width: 20%; float: left; border: 2px solid maroon; height: 400px; margin-top: 5px; margin-left: 1%; margin-bottom: 10px; margin-right: 1%; background-color: aliceblue; display: inline-block; overflow-x: scroll; overflow-y: scroll;"></div>
+		<br style="clear: left;">
+	</div>
+	<div id="output"></div>
+</body>
+<script>
+  google.load('visualization', '1', {'packages':['annotatedtimeline']});
+  function drawChart(dayCount){
+	  var data = new google.visualization.DataTable();
+      data.addColumn('date', 'Month');
+      data.addColumn('number', 'Tweets Count');
+      for(var i in dayCount)
+	  {
+    	  var d=new Date(dayCount[i][0]);
+    	var UTCDate= new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()); 
+	   	data.addRow([UTCDate,dayCount[i][1]]);
+	  }
+  var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('timeline'));
+  chart.draw(data, {displayAnnotations: true});
+}
+  function drawHashTableCheckBoxes(){
+  var mydata=jsonstr;
+  var hashTags=mydata[0].hashtags;
+  var tablecontents = "";
+		  tablecontents = "<table>";
+		 tablecontents += "<tr  style='padding-bottom: 15px;' > <td><input style='width:30px' type='checkbox' id='" + "ALL" + "' value='" + "ALL" + "' onclick = 'createAlerts(this)'/>ALL<td></tr>";
+		
+		 
+		 for (var i = 0; i < hashTags.length; i++) {
+         tablecontents += "<tr style='padding-bottom: 15px;'>";			 
+			tablecontents += "<td><input style='width:30px;' type='checkbox' id='" + hashTags[i]+ "' value='" + hashTags[i] + "' onclick = 'createAlerts(this)'/>"
+			+hashTags[i] +"</td>";		
+          tablecontents += "</tr>"			
+		 }
+		 document.getElementById('#breakinghashtags').innerHTML = tablecontents;
+ }
+  function createAlerts()
+  {
+	  var n = $("input:checked");
+	  var hashTagsSelected = [];
+	  if(n.length==0)
+		  {
+		  document.getElementById('timeline').innerHTML='<h2 style="text-align:center"> Please select at least one HASH TAg</h2>';
+		  }
+	  else{
+		 
+		 for(var i=0;i<n.length;i++)
+		 {		   
+		   hashTagsSelected.push(n[i].value);		 
+		 }
+		 callManager(hashTagsSelected);
+	  } 
+	 var hashTagsToBePrinted='';
+	  for(var i=0;i<n.length;i++)
+		  {
+		  	hashTagsToBePrinted+=n[i].value+' ';
+		  }
+	  document.getElementById('output').innerHTML='<h3> Selected HashTags are </h3>'+hashTagsToBePrinted;
+   }
+  </script>	
+<script>
+  //drawing HashTags Table with checkboxes
+ 	drawHashTableCheckBoxes();
+  </script>
+</html>
