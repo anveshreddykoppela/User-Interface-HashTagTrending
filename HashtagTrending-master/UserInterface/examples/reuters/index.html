@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HashTag Trending</title>
+<link rel="stylesheet" href="css/reuters.css">
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/jquery-ui.min.js"></script>
+<link rel="stylesheet"
+	href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css">
+<script src="js/reuters.js"></script>
+<script src="../../core/Core.js"></script>
+<script src="../../core/AbstractManager.js"></script>
+<script src="../../managers/Manager.jquery.js"></script>
+<script src="../../core/Parameter.js"></script>
+<script src="../../core/ParameterStore.js"></script>
+<script src="../../core/AbstractWidget.js"></script>
+<script src="widgets/ResultWidget.js"></script>
+<script src="../../core/AbstractFacetWidget.js"></script>
+<!-- Anvesh changes -->
+<script src="widgets/VolumeHashTags.js"></script>
+<script
+	src="file://G:\\Eclipse_main\\HashTagTrending\\UserInterface\\jsonhashtag.jsonp"></script>
+<script type='text/javascript' src='http://www.google.com/jsapi'></script>
+<!-- Anvesh Changes -->
+<!--  <script src="../../widgets/jquery/PagerWidget.js"></script> -->
+
+<!--   <script src="widgets/TagcloudWidget.js"></script>
+  <script src="widgets/CurrentSearchWidget.9.js"></script>
+  <script src="../../core/AbstractTextWidget.js"></script>
+  <script src="widgets/AutocompleteWidget.js"></script>
+  <script src="widgets/CountryCodeWidget.js"></script>
+  <script src="widgets/CalendarWidget.js"></script> -->
+</head>
+<body style="background-color: #FFFFFF">
+	<div id="wrapper"
+		style="width: 100%; height: 100%; background-color: #DCDCDC;">
+		<div id="header"
+			style="width: 100%; height: 80px; text-align: center; font-size: xx-large; font-family: cursive; font-style: italic; padding-top: 15px;background-color:#F5FFFA; border: 2px solid maroon">
+			Hash Tag Trending Demonstration</div>
+		<div id="timeline"
+			style="width: 70%; height: 400px; float: left; font-family: cursive; font-style: italic; padding-top: 15px; border: 2px dotted maroon; background-color: aliceblue; margin-top: 5px; margin-left: 1%; margin-bottom: 10px; margin-right: 1%;"><h1>Annotated
+			Timeline</h1> 
+			<h3> please select HASH TAGS from the list</div>
+		<div id="#breakinghashtags"
+			style="width: 25%; float: left; border: 2px solid maroon; height: 390px; margin-top: 5px; margin-left: 1%; margin-bottom: 10px; margin-right: 1%; background-color: aliceblue; display: inline-block; overflow-x: scroll; overflow-y: scroll;"></div>
+		<!-- <div id="resetButton" style="float:left; height:20px; width 5%; margin-left:12px" > <button type="button" onclick="resetCheckboxes()"> RESET </button></div> -->	
+		<br style="clear: left;">
+	</div>
+	<div id="output" style="border: 1px dotted maroon; width:99%;height:90px;margin:0px 20px 0px 5px; padding:10px 2px 2px 5px "></div>
+</body>
+<script>
+	hashTagsSelected = [];
+	google.load('visualization', '1', {
+		'packages' : [ 'annotatedtimeline' ]
+	});
+	function resetCheckboxes(){
+		
+		
+	}
+	function drawChart(dates) {
+		var data = new google.visualization.DataTable();
+		//console.log(dates);
+		data.addColumn('date', 'Day');
+		for (var n = 0; n < hashTagsSelected.length; n++) {
+			data.addColumn('number', tweetsDayCountMap[n][0]);
+			//console.log(hashTagsSelected[n]);
+		}
+		data.addRows(dates.length);
+		//console.log("test1");
+		//console.log(tweetsDayCountMap);
+		for(var i=0;i<dates.length;i++){
+			//console.log(dates[i]);
+			var d = new Date(dates[i]);
+			var UTCDate = new Date(d.getUTCFullYear(), d.getUTCMonth(), d
+					.getUTCDate());
+			//console.log(UTCDate);
+			var row=new Array();
+			for(var j=0;j<tweetsDayCountMap.length;j++){
+				var tempDayCount=tweetsDayCountMap[j][1];
+				//console.log(tempDayCount);
+				var found=false;
+				for(var k=0;k<tempDayCount.length;k++){
+					if(dates[i]==tempDayCount[k][0])
+						{
+							//row.push(tempDayCount[k][1]);
+							row[row.length]=parseInt(tempDayCount[k][1]);
+							found=true;
+							break;
+						}
+				}
+				if(!found)
+					{
+						row[row.length]=0;
+						//row.push(0);
+					}
+				
+			}
+			//console.log(row);
+			//popultaing data table
+			
+			data.setCell(i,0,UTCDate);
+			for(var count=0;count<row.length;count++){
+				var columnNumber=count+1;
+				data.setCell(i,columnNumber,row[count]);
+				
+			}
+		}
+		var chart = new google.visualization.AnnotatedTimeLine(document
+				.getElementById('timeline'));
+		chart.draw(data, {
+			'displayAnnotations' : false,'allowRedraw':true,'title':'trends'
+		});
+	}
+	function drawHashTableCheckBoxes() {
+		var mydata = jsonstr;
+		var hashTags = mydata[0].hashtags;
+		var tablecontents = "";
+		tablecontents = "<table>";
+		for (var i = 0; i < hashTags.length; i++) {
+			tablecontents += "<tr style='padding-bottom: 15px;'>";
+			tablecontents += "<td><input style='width:30px;' type='checkbox' id='"
+					+ hashTags[i]
+					+ "' value='"
+					+ hashTags[i]
+					+ "' onclick = 'createAlerts(this)'/>"
+					+ hashTags[i]
+					+ "</td>";
+			tablecontents += "</tr>"
+		}
+		document.getElementById('#breakinghashtags').innerHTML = tablecontents;
+	}
+	function createAlerts() {
+		var n = $("input:checked");
+		//console.log(hashTagsSelected.length);
+		 while(hashTagsSelected.length!=0){
+			hashTagsSelected.pop();
+		}
+		//console.log(hashTagsSelected.length);
+		if (n.length == 0) {
+			document.getElementById('timeline').innerHTML = '<h1 style="text-align:center;padding-top:10px;font-color:red"> Please select at least one HASH TAG...!</h1>';
+		} else {
+
+			for (var i = 0; i < n.length; i++) {
+				hashTagsSelected.push(n[i].value);
+			}
+			//console.log(hashTagsSelected);
+			callManager();
+		}
+		var hashTagsToBePrinted = '';
+		for (var j = 0; j < n.length; j++) {
+			hashTagsToBePrinted += n[j].value + ' ';
+		}
+		document.getElementById('output').innerHTML = '<h3 style="font-family:bold"> Selected HashTags : </h3>'
+				+ hashTagsToBePrinted;
+	}
+</script>
+<script>
+	//drawing HashTags Table with checkboxes
+	drawHashTableCheckBoxes();
+</script>
+</html>
